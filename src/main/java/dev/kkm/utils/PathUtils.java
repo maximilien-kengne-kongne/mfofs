@@ -6,6 +6,7 @@ import dev.kkm.exception.FileStorageException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 /**
  * Utility class for path manipulation and validation.
@@ -68,7 +69,7 @@ public class PathUtils {
      * @throws FileStorageException if the base directory path is invalid.
      */
     public static Path resolveBaseDir(String baseDirPath) {
-        if (baseDirPath == null || baseDirPath.trim().isEmpty()) {
+        if (Objects.toString(baseDirPath,"").isBlank()) {
             throw new FileStorageException("Base directory path is not configured.");
         }
         try {

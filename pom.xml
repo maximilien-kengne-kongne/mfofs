@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.maximilien-kengne-kongne</groupId>
 	<artifactId>mfofs-spring-boot-starter</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>mfofs-spring-boot-starter</name>
 	<description>managing files on the file system</description>
 	<packaging>jar</packaging>

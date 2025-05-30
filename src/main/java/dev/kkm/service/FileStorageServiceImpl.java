@@ -13,10 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -59,8 +56,9 @@ public class FileStorageServiceImpl implements FileStorageService {
         if (file.isEmpty()) {
             throw new FileStorageException("Cannot store empty file.");
         }
-        if (targetDirectory == null) {
-            targetDirectory = ""; // Default to root
+
+        if (Objects.toString(targetDirectory, "").isBlank()) {
+            targetDirectory = baseDir; // Default to root
         }
 
         validateEntry(filename);
@@ -102,13 +100,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     public Resource getFileAsResource(String filePath) {
         try {
             Path file = resolveAndValidate(filePath);
-
             if (!Files.exists(file) || !Files.isRegularFile(file)) {
                 throw new FileStorageException(filePath);
             }
-
             Resource resource = new UrlResource(file.toUri());
-
 
             if (resource.exists() || resource.isReadable()) {
                 return resource;
@@ -145,9 +140,11 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String createDirectory(String directoryPath) {
         log.info("Creating directory: {}", directoryPath);
-        if (directoryPath == null || directoryPath.trim().isEmpty()) {
+
+        if (Objects.toString(directoryPath, "").isBlank() ) {
             throw new FileStorageException("Directory path cannot be empty.");
         }
+
         try {
             Path dirToCreate = resolveAndValidate(directoryPath);
 
@@ -174,8 +171,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     public String copyFile(String sourcePath, String targetPath) {
         log.info("Copying file {} to {}", sourcePath, targetPath);
 
-        if (sourcePath == null || sourcePath.trim().isEmpty() || targetPath == null || targetPath.trim().isEmpty()) {
-            throw new FileStorageException("Source and target paths cannot be empty.");
+        if (Objects.toString(sourcePath, "").isBlank() || Objects.toString(targetPath, "").isBlank()) {
+            throw new FileStorageException("Source or target paths cannot be empty.");
         }
         try {
             Path source = resolveAndValidate(sourcePath);
@@ -207,9 +204,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     public String moveFile(String sourcePath, String targetPath) {
         log.info("Moving file {} to {}", sourcePath, targetPath);
 
-        if (sourcePath == null || sourcePath.trim().isEmpty() || targetPath == null || targetPath.trim().isEmpty()) {
-            throw new FileStorageException("Source and target paths cannot be empty.");
+        if (Objects.toString(sourcePath, "").isBlank() || Objects.toString(targetPath, "").isBlank()) {
+            throw new FileStorageException("Source or target paths cannot be empty.");
         }
+
         try {
             Path source = resolveAndValidate(sourcePath);
             Path target = resolveAndValidate(targetPath);
@@ -236,8 +234,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void renameDirectory(String oldDirectory, String newDirectory)  {
 
-        if (oldDirectory == null || oldDirectory.trim().isEmpty() || newDirectory == null || newDirectory.trim().isEmpty()) {
-            throw new FileStorageException("Old and new directories cannot be empty.");
+        if (Objects.toString(oldDirectory, "").isBlank() || Objects.toString(newDirectory, "").isBlank()) {
+            throw new FileStorageException("Old or new directories cannot be empty.");
         }
 
         Path sourcePath = resolveAndValidate(oldDirectory);
@@ -262,9 +260,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void delete(String path) {
         log.info("Deleting file " + path);
-        if (path == null || path.trim().isEmpty()) {
+        if (Objects.toString(path, "").isBlank()) {
             throw new FileStorageException("Path to delete cannot be empty.");
         }
+
         try {
             Path itemToDelete = resolveAndValidate(path);
 
@@ -285,9 +284,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public void deleteRecursive(String path) throws FileStorageException {
-        if (path == null || path.trim().isEmpty()) {
+
+        if (Objects.toString(path, "").isBlank()) {
             throw new FileStorageException("Path to delete cannot be empty.");
         }
+
         try {
             Path itemToDelete = resolveAndValidate(path);
 
@@ -397,7 +398,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             // If the directory path validation fails, it's a file system issue or bad path.
             // But if the *resolved* path doesn't exist, that's a FileNotFound.
             // Check existence after validation but before trying to list.
-            Path potentialDir = PathUtils.resolveAndValidatePath(baseDirPath, directoryPath == null || directoryPath.trim().isEmpty() ? "/" : directoryPath);
+            Path potentialDir = PathUtils.resolveAndValidatePath(baseDirPath, Objects.toString(directoryPath, "").isBlank() ? "/" : directoryPath);
             if (!Files.exists(potentialDir)) {
                 throw new FileStorageException("File not found" + directoryPath);
             }
@@ -440,12 +441,12 @@ public class FileStorageServiceImpl implements FileStorageService {
      */
     private Path resolveAndValidate(String userPath) {
         // Handle null or empty path for root operations
-        String cleanedUserPath = userPath == null || userPath.trim().isEmpty() ? "/" : userPath;
+        String cleanedUserPath = Objects.toString(userPath, "").isBlank() ? "/" : userPath;
         return PathUtils.resolveAndValidatePath(baseDirPath, cleanedUserPath);
     }
 
     private void validateEntry(String entry) {
-        if (entry == null || entry.isBlank()) {
+        if (Objects.toString(entry, "").isBlank()) {
             throw new FileStorageException(entry + " cannot be null or empty");
         }
     }
