@@ -57,16 +57,19 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new FileStorageException("Cannot store empty file.");
         }
 
-        if (Objects.toString(targetDirectory, "").isBlank()) {
-            targetDirectory = baseDir; // Default to root
-        }
-
         validateEntry(filename);
 
         try {
-            // Resolve the target directory path and ensure it's within the base directory
-            Path targetDirPath = resolveAndValidate(targetDirectory);
 
+            Path targetDirPath;
+
+            if (Objects.toString(targetDirectory, "").isBlank()) {
+                targetDirPath = baseDirPath.resolve(filename); // Default to root
+            }else {
+                // Resolve the target directory path and ensure it's within the base directory
+               targetDirPath = baseDirPath.resolve(targetDirectory);
+            }
+            
             // Ensure the target path is actually a directory
             if (Files.exists(targetDirPath) && !Files.isDirectory(targetDirPath)) {
                 throw new FileStorageException("Target path '" + targetDirectory + "' is not a directory.");
