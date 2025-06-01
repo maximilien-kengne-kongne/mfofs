@@ -36,7 +36,7 @@ To use this starter you will need to add the following dependency to your projec
 <dependency>
     <groupId>io.github.maximilien-kengne-kongne</groupId>
     <artifactId>mfofs-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -45,11 +45,6 @@ Don't add again these dependencies in your project
 
 ``` xml
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

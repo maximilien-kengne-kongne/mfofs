@@ -57,7 +57,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new FileStorageException("Cannot store empty file.");
         }
 
-        validateEntry(filename);
+        validateFilename(filename);
 
         try {
 
@@ -68,31 +68,22 @@ public class FileStorageServiceImpl implements FileStorageService {
             }else {
                 // Resolve the target directory path and ensure it's within the base directory
                targetDirPath = baseDirPath.resolve(targetDirectory);
-            }
-            
-            // Ensure the target path is actually a directory
-            if (Files.exists(targetDirPath) && !Files.isDirectory(targetDirPath)) {
-                throw new FileStorageException("Target path '" + targetDirectory + "' is not a directory.");
-            }
 
-            // Create target directory if it doesn't exist
-            Files.createDirectories(targetDirPath);
+                // Ensure the target path is actually a directory
+                if (Files.exists(targetDirPath) && !Files.isDirectory(targetDirPath)) {
+                    throw new FileStorageException("Target path '" + targetDirectory + "' is not a directory.");
+                }
 
-            // Resolve the full target file path
-            // Sanitize the original filename to prevent issues (e.g., weird characters)
-            String originalFilename = StringUtils.cleanPath(filename);
-            if (originalFilename.contains("..")) {
-                // This check is technically redundant if PathUtils is perfect, but good layered defense
-                throw new FileStorageException("Cannot store file with relative path segments (..)");
+                // Create target directory if it doesn't exist
+                Files.createDirectories(targetDirPath);
+                targetDirPath = targetDirPath.resolve(filename);
             }
-
-            Path targetFilePath = targetDirPath.resolve(originalFilename);
 
             // Copy the file's input stream to the target file path
-            Files.copy(file.getInputStream(), targetFilePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.getInputStream(), targetDirPath, StandardCopyOption.REPLACE_EXISTING);
 
             // Return the relative path from the base directory
-            return baseDirPath.relativize(targetFilePath).toString();
+            return baseDirPath.relativize(targetDirPath).toString();
 
         } catch (Exception e) {
             throw new FileStorageException(e.getMessage());
@@ -448,9 +439,17 @@ public class FileStorageServiceImpl implements FileStorageService {
         return PathUtils.resolveAndValidatePath(baseDirPath, cleanedUserPath);
     }
 
-    private void validateEntry(String entry) {
-        if (Objects.toString(entry, "").isBlank()) {
-            throw new FileStorageException(entry + " cannot be null or empty");
+    private void validateFilename(String filename) {
+        if (Objects.toString(filename, "").isBlank()) {
+            throw new FileStorageException(filename + " cannot be null or empty");
+        }
+
+        // Resolve the full target file path
+        // Sanitize the original filename to prevent issues (e.g., weird characters)
+        String originalFilename = StringUtils.cleanPath(filename);
+        if (originalFilename.contains("..")) {
+            // This check is technically redundant if PathUtils is perfect, but good layered defense
+            throw new FileStorageException("Cannot store file with relative path segments (..)");
         }
     }
 }
